@@ -5,7 +5,12 @@ using VSCodeDebug;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
+    {
+        MainImpl().GetAwaiter().GetResult();
+    }
+
+    static async Task MainImpl()
     {
         // Launch OpenDebugAD7 adapter
         var startInfo = new ProcessStartInfo();
@@ -21,8 +26,15 @@ class Program
             // Start chatting with it
             var client = new DebugClient();
             Task running = client.Start(proc.StandardOutput.BaseStream, proc.StandardInput.BaseStream);
-            client.SendMessage(new InitializeRequest(""));
-            client.SendMessage(new LaunchRequest(""));
+            new System.Threading.Thread(() => running.GetAwaiter().GetResult());
+
+            InitializeResponse initResponse = await client.Initialize(new InitializeRequest(new InitializeRequestArguments()));
+
+            Response launchResponse = await client.Request(new LaunchRequest(new LaunchArguments()
+            {
+                program = @"C:\Users\jcouv\.babun\cygwin\home\jcouv\issues\hello-world\bin\Debug\netcoreapp1.0\hello-world.dll",
+                cwd = @"C:\Users\jcouv\.babun\cygwin\home\jcouv\issues\hello-world\bin\Debug\netcoreapp1.0"
+            }));
 
             proc.WaitForExit();
 
@@ -40,10 +52,6 @@ public class DebugClient : ProtocolClient
     }
 
     protected override void DispatchEvent(Event @event)
-    {
-    }
-
-    protected override void DispatchResponse(Response response)
     {
     }
 }
