@@ -47,7 +47,7 @@ namespace VSCodeDebug
         public string message;
         public int request_seq;
         public string command;
-        // bool running
+        public bool running;
         // refs
 
         public Response() : base("response") { }

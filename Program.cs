@@ -33,10 +33,19 @@ class Program
             Response launchResponse = await client.Request(new LaunchRequest(new LaunchArguments()
             {
                 program = @"C:\Users\jcouv\.babun\cygwin\home\jcouv\issues\hello-world\bin\Debug\netcoreapp1.0\hello-world.dll",
-                cwd = @"C:\Users\jcouv\.babun\cygwin\home\jcouv\issues\hello-world\bin\Debug\netcoreapp1.0"
+                cwd = @"C:\Users\jcouv\.babun\cygwin\home\jcouv\issues\hello-world\bin\Debug\netcoreapp1.0",
+                logging = new LoggingOptions() { engineLogging = true, trace = true, traceResponse = true }
             }));
 
             await client.Initialized();
+
+            Response response;
+            response = await client.Request(new SetExceptionBreakpointsRequest(new SetExceptionBreakpointsArguments()));
+            response = await client.Request(new ConfigurationDoneRequest());
+            response = await client.Request(new ThreadsRequest());
+            // response = await client.Request(new NextRequest(new NextArguments()));
+            // response = await client.Request(new ThreadsRequest());
+            // response = await client.Request(new StackTraceRequest(new StackTraceArguments()));
 
             proc.WaitForExit();
 

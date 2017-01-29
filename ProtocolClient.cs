@@ -21,25 +21,69 @@ namespace VSCodeDebug
         public string adapterID = "coreclr";
         public string pathFormat = "path";
         public bool ShouldSerializePathFormat() => pathFormat != null && pathFormat != "path";
+		public bool linesStartAt1 = true;
+        public bool columnsStartAt1 = true;
+        public bool supportsVariableType = false; // TODO
+        public bool supportsVariablePaging = false; // TODO
+        public bool supportRunInTerminalRequest = false; // TODO
     }
 
     public class LaunchRequest : Request
     {
         public LaunchRequest(LaunchArguments arg) : base("launch", arg) { }
     }
+    public class ThreadsRequest : Request
+    {
+        public ThreadsRequest() : base("threads", null) { }
+    }
+    public class NextRequest : Request
+    {
+        public NextRequest(NextArguments args = null) : base("next", args) { }
+    }
+    public class NextArguments
+    {
+        public int threadID = 0;
+    }
+    public class StackTraceRequest : Request
+    {
+        public StackTraceRequest(StackTraceArguments args) : base("stackTrace", args) { }
+    }
+    public class StackTraceArguments
+    {
+        public int threadID = 0;
+        // startFrame
+        // levels
+        // format
+    }
+    public class SetExceptionBreakpointsRequest : Request
+    {
+        public SetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments args) : base("setExceptionBreakpoints", args)
+        {
+        }
+    }
+    public class SetExceptionBreakpointsArguments
+    {
+        public string[] filters = new string[] { "user-unhandled", "all" };
+    }
+    public class ConfigurationDoneRequest : Request
+    {
+        public ConfigurationDoneRequest() : base("configurationDone", null) { }
+    }
 
     public class LaunchArguments
     {
         public string program = "";
         public string cwd = "";
-        public string[] args = null;
-        public string name = "bob";
+        public string[] args = new string[] { };
+        public string name = ".NET Core Launch (console)";
         public string type = "coreclr";
         public string request = "launch";
         public bool stopAtEntry = true;
         public bool externalConsole = false;
         public LoggingOptions logging;
-        public bool ShouldSerializeLogging => logging != null;
+        public bool ShouldSerializeLogging() => logging != null;
+        public string launchCompleteCommand = "exec-run";
+        public int processID = 0;
 
         // env
         // launchBrowser
@@ -258,7 +302,14 @@ namespace VSCodeDebug
                 if (TRACE && @event.eventType == "output")
                 {
                     var output = JsonConvert.DeserializeObject<OutputEvent>(msg);
-                    Console.Error.WriteLine(output.body.output);
+                    if (output.body.data == null)
+                    {
+                        Console.Error.WriteLine(output.body.output);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine(string.Format("Event {0}: {1}", @event.eventType, JsonConvert.SerializeObject(@event.body)));
+                    }
                 }
                 else if (TRACE)
                 {

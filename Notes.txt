@@ -24,11 +24,12 @@ Need details on the VS Code debug protocol:
 
 
 
-I wonder if it is possible to log the debug protocol within VS Code.
+It is possible to log most of the debug protocol by setting logging options on the debug adapter, but that doesn't seem to log everything (expecially the initiailization/launch).
 
-How is the engine plugin configured?
-
-
+I am still not able to get the exec-run command send to the debug engine, and get the first "stopped" event.
+Either I missed some steps that will unlock this one (maybe setting breakpoints and other settings), or some parameters are wrong.
+I don't know if the key decision resides in the adapter or the debug engine...
+Investigating from the VSCode angle may also offer some insights. Or looking at the tests for debug adapter or engine.
 
 
 
