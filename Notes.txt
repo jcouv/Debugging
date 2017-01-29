@@ -1,0 +1,34 @@
+OpenDebugAD7 is launched by proxy.js (but there is a mention that it can be run from manifest). Probably two parameters, but I'm not sure what values.
+
+VS Code has a debug protocol and runs debug extensions/adapters in a separate process, as a standalone program. They are not running in the regular extension host.
+OpenDebugAD7 speaks this protocol and translates to Visual Studio debug engine API (IDebugEngine2). The actual debug engine appears to be a plugin (.NET PCL library).
+This communication between VSCode and the adapter uses stdin/stdout ("v8 protocol").
+https://www.nuget.org/packages/Microsoft.VisualStudio.OpenDebugAD7
+
+The manifest for vscode-csharp declares a debugger and many parameters/controls. It looks like those are not understood by VS Code. They are just used as documentation to guide the user. Then all the values from the user get passed to the adapter.
+
+I'm probably going to interface on top of OpenDebugAD7, rather than work with specific engines.
+
+In the project, the launch json has two entries: one to launch the project, and the other to attach to it. This is probably regular VSCode stuff.
+But one interesting thing is "processId": "${command.pickProcess}".
+
+
+
+Need details on the VS Code debug protocol:
+- client sends "initialize" request (with paths)
+- client sends "launch" or "attach" request (with user-provided arguments)
+- adapter sends an "initialize" event (to indicate it is ready to receive breakpoints)
+- adapter sends a "stopped" event (with reason and thread id)
+- client sends "threads" and "stacktrace" requests to get more details, it can also get more details about stack frames (including scopes and variables in scope).
+- client sends a "disconnect" request (which will close a "launched" program and detach from an "attached" program)
+
+
+
+I wonder if it is possible to log the debug protocol within VS Code.
+
+How is the engine plugin configured?
+
+
+
+
+
