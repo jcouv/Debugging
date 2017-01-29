@@ -116,7 +116,7 @@ namespace VSCodeDebug
         }
 
         protected abstract void DispatchEvent(Event @event);
-        private ConcurrentDictionary<int, TaskCompletionSource<Response>> board =
+        private ConcurrentDictionary<int, TaskCompletionSource<Response>> responseBoard =
             new ConcurrentDictionary<int, TaskCompletionSource<Response>>();
 
         public async Task<InitializeResponse> Initialize(InitializeRequest request)
@@ -129,7 +129,7 @@ namespace VSCodeDebug
         {
             request.seq = _sequenceNumber++;
             var task = new TaskCompletionSource<Response>();
-            board[request.seq] = task;
+            responseBoard[request.seq] = task;
 
             SendMessage(request);
             return await task.Task;
@@ -226,7 +226,7 @@ namespace VSCodeDebug
             {
                 var response = JsonConvert.DeserializeObject<Response>(msg);
                 TaskCompletionSource<Response> task;
-                board.TryRemove(response.request_seq, out task);
+                responseBoard.TryRemove(response.request_seq, out task);
 
                 if (TRACE)
                     Console.Error.WriteLine(string.Format("Response {0}: {1}", response.command, msg));

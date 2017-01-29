@@ -36,6 +36,8 @@ class Program
                 cwd = @"C:\Users\jcouv\.babun\cygwin\home\jcouv\issues\hello-world\bin\Debug\netcoreapp1.0"
             }));
 
+            await client.Initialized();
+
             proc.WaitForExit();
 
             // Retrieve the app's exit code
@@ -46,6 +48,7 @@ class Program
 
 public class DebugClient : ProtocolClient
 {
+    TaskCompletionSource<bool> initialized = new TaskCompletionSource<bool>();
     public DebugClient() : base()
     {
         TRACE = true;
@@ -53,5 +56,16 @@ public class DebugClient : ProtocolClient
 
     protected override void DispatchEvent(Event @event)
     {
+        switch(@event.eventType)
+        {
+            case "initialized":
+                initialized.SetResult(true);
+                break;
+        }
+    }
+
+    public async Task<bool> Initialized()
+    {
+        return await initialized.Task;
     }
 }
